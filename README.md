@@ -15,7 +15,7 @@ S3 — equally well.)
 ## Local preview
 
 ```bash
-npx serve .        # or: python3 -m http.server
+npx serve public        # or: python3 -m http.server
 ```
 
 ## Design notes
