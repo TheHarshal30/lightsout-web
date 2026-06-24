@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lightsout — does your site paint as fast as the network allows?</title>
+<meta name="description" content="lightsout computes the earliest paint physically possible (the network floor), then measures how long JavaScript actually makes you wait. A CLI tool, validated against 77 real sites.">
+<meta property="og:title" content="lightsout — paint efficiency over document size">
+<meta property="og:description" content="The network is rarely the bottleneck. JavaScript is. Measure it from your terminal.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:#0a0c0f;color:#e7e9ec;font-family:'Space Grotesk',system-ui,-apple-system,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+  ::selection{background:rgba(80,220,120,0.25)}
+  a{color:inherit;text-decoration:none}
+  .mono{font-family:'IBM Plex Mono','SF Mono',ui-monospace,monospace}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 24px}
+  .lights{display:flex;gap:14px}
+  .lights span{width:26px;height:26px;border-radius:50%;background:#15181d;border:1px solid #23282f;animation:pulse 1.8s ease-in-out infinite}
+  .lights span:nth-child(2){animation-delay:.12s}.lights span:nth-child(3){animation-delay:.24s}
+  .lights span:nth-child(4){animation-delay:.36s}.lights span:nth-child(5){animation-delay:.48s}
+  .lights.go span{background:#50dc78;border-color:#50dc78;box-shadow:0 0 14px rgba(80,220,120,.6);animation:none}
+  @keyframes pulse{0%,100%{background:#15181d}50%{background:#eb5a5a;border-color:#eb5a5a;box-shadow:0 0 12px rgba(235,90,90,.5)}}
+  nav{position:sticky;top:0;z-index:10;background:rgba(10,12,15,.82);backdrop-filter:blur(12px);border-bottom:1px solid #1a1e24}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;padding-top:14px;padding-bottom:14px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600}
+  .brand .lights span{width:9px;height:9px}
+  .navlinks{display:flex;gap:20px;font-size:13px;color:#8b919b}
+  .navlinks a:hover{color:#e7e9ec}
+  h1{font-size:clamp(34px,6vw,58px);line-height:1.04;font-weight:700;letter-spacing:-.025em;text-wrap:balance}
+  h2{font-size:26px;font-weight:600;letter-spacing:-.01em}
+  .sub{color:#8b919b;font-size:18px;max-width:580px}
+  .panel{background:#0e1115;border:1px solid #1a1e24;border-radius:16px;padding:28px}
+  .green{color:#50dc78}.amber{color:#eb9646}.red{color:#eb5a5a}.muted{color:#5a616b}
+  .code{background:#07090b;border:1px solid #1a1e24;border-radius:10px;padding:16px 20px;font-size:14px;overflow-x:auto;white-space:pre}
+  .row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #15181d;font-size:14px}
+  .row:last-child{border-bottom:none}
+  .bar{width:60px;height:6px;background:#16191e;border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:10px}
+  .bar i{display:block;height:100%}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  @media(max-width:720px){.grid3,.grid2{grid-template-columns:1fr}.navlinks{display:none}}
+  footer{border-top:1px solid #1a1e24;color:#5a616b;font-size:13px}
+</style>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"></noscript>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <div class="brand"><div class="lights go"><span></span><span></span><span></span><span></span><span></span></div><span class="mono" style="font-size:15px">lights<span class="green">out</span></span></div>
+  <div class="navlinks mono"><a href="#how">how</a><a href="#study">benchmark</a><a href="#cli">cli</a><a href="https://github.com/TheHarshal30/lightsout">github ↗</a></div>
+</div></nav>
+
+<header class="wrap" style="text-align:center;padding:96px 24px 64px">
+  <div style="display:flex;justify-content:center;margin-bottom:36px"><div class="panel" style="display:inline-block;padding:22px 26px"><div class="lights"><span></span><span></span><span></span><span></span><span></span></div></div></div>
+  <div class="mono green" style="font-size:12px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:20px">lights out · and away we go</div>
+  <h1 style="max-width:780px;margin:0 auto 18px">Does your site paint as fast as the network allows?</h1>
+  <p class="sub" style="margin:0 auto 36px">lightsout computes the earliest paint physically possible — the <b style="color:#e7e9ec">network floor</b> — then measures how long JavaScript actually makes you wait.</p>
+  <div class="code mono" style="display:inline-block;text-align:left"><span class="muted">$</span> npx lightsout https://your-site.com <span class="green">--fcp</span></div>
+  <div class="mono muted" style="font-size:13px;margin-top:14px">a CLI tool · zero config · works on any URL or local project</div>
+</header>
+
+<section class="wrap" style="padding-bottom:40px">
+  <div class="panel" style="padding:46px;text-align:center;background:linear-gradient(150deg,#0f1318,#0b0e12)">
+    <div style="font-size:clamp(24px,4vw,32px);font-weight:700;letter-spacing:-.015em;margin-bottom:28px">Network constraints matter. <span class="green">JavaScript dominates.</span></div>
+    <div class="grid3 mono" style="max-width:760px;margin:0 auto">
+      <div><div style="font-size:40px;font-weight:600">77</div><div class="muted" style="font-size:12px;margin-top:6px">sites studied</div></div>
+      <div style="border-left:1px solid #1a1e24;border-right:1px solid #1a1e24"><div class="amber" style="font-size:40px;font-weight:600">10.7×</div><div class="muted" style="font-size:12px;margin-top:6px">mean FCP vs floor</div></div>
+      <div><div class="red" style="font-size:40px;font-weight:600">≈0</div><div class="muted" style="font-size:12px;margin-top:6px">size ↔ paint correlation</div></div>
+    </div>
+    <p class="muted" style="font-size:14px;margin:26px auto 0;max-width:520px">A 5 KB page can paint in 13 seconds. A 257 KB page can paint in 0.5. Bytes don't decide paint.</p>
+  </div>
+</section>
+
+<section class="wrap" style="padding-bottom:40px">
+  <div class="grid2">
+    <div class="panel">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px"><span style="width:8px;height:8px;border-radius:50%;background:#50dc78;box-shadow:0 0 10px #50dc78"></span><b style="font-size:15px">Lights out — paints at the floor</b></div>
+      <div class="row"><span>dell.com</span><span class="mono green"><span class="bar"><i style="width:100%;background:#50dc78"></i></span>1.00</span></div>
+      <div class="row"><span>lyft.com</span><span class="mono green"><span class="bar"><i style="width:100%;background:#50dc78"></i></span>1.00</span></div>
+      <div class="row"><span>netlify.com</span><span class="mono green"><span class="bar"><i style="width:87%;background:#50dc78"></i></span>0.87</span></div>
+      <div class="row"><span>mozilla.org</span><span class="mono" style="color:#a6d94f"><span class="bar"><i style="width:76%;background:#a6d94f"></i></span>0.76</span></div>
+    </div>
+    <div class="panel">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px"><span style="width:8px;height:8px;border-radius:50%;background:#eb5a5a;box-shadow:0 0 10px #eb5a5a"></span><b style="font-size:15px">Stuck on the grid — JS-bound</b></div>
+      <div class="row"><span>reddit.com</span><span class="mono red"><span class="bar"><i style="width:4%;background:#eb5a5a"></i></span>0.01</span></div>
+      <div class="row"><span>outlook.live.com</span><span class="mono red"><span class="bar"><i style="width:4%;background:#eb5a5a"></i></span>0.01</span></div>
+      <div class="row"><span>spotify.com</span><span class="mono red"><span class="bar"><i style="width:6%;background:#eb5a5a"></i></span>0.03</span></div>
+      <div class="row"><span>theguardian.com</span><span class="mono red"><span class="bar"><i style="width:6%;background:#eb5a5a"></i></span>0.03</span></div>
+    </div>
+  </div>
+  <p class="mono muted" style="font-size:12px;text-align:center;margin-top:18px">Some sites <span class="green">fit 14 KB but paint slowly</span>; others <span class="amber">bust the window but paint fast</span>. Size is not the signal.</p>
+</section>
+
+<section id="how" class="wrap" style="padding:48px 24px">
+  <h2 style="margin-bottom:26px">How it works</h2>
+  <div class="grid3">
+    <div class="panel"><div class="mono green" style="font-size:13px;margin-bottom:12px">01</div><b style="font-size:17px">Network floor</b><p class="muted" style="font-size:14px;margin-top:8px">Count the critical-path round trips at a fixed RTT — the earliest first paint physically possible. Pure protocol math, no browser.</p></div>
+    <div class="panel"><div class="mono green" style="font-size:13px;margin-bottom:12px">02</div><b style="font-size:17px">Real paint</b><p class="muted" style="font-size:14px;margin-top:8px">Render the page in headless Chrome under the same throttle and record when the first pixel actually lands.</p></div>
+    <div class="panel"><div class="mono green" style="font-size:13px;margin-bottom:12px">03</div><b style="font-size:17px">PRR + class</b><p class="muted" style="font-size:14px;margin-top:8px">Divide floor by actual paint. 1.00 is lights-out. Five classes from <span class="red">JS-bound</span> to <span class="green">floor-limited</span>.</p></div>
+  </div>
+</section>
+
+<section id="cli" class="wrap" style="padding:48px 24px">
+  <div class="mono green" style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:12px">It's a CLI</div>
+  <h2 style="margin-bottom:10px">Everything runs in your terminal</h2>
+  <p class="sub" style="margin-bottom:28px">No dashboard to babysit. Audit a URL, scan your repo, or gate your CI on paint readiness.</p>
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div class="panel"><div class="mono green" style="font-size:14px;margin-bottom:6px">npx lightsout &lt;url&gt; --fcp</div><div style="font-weight:600;margin-bottom:4px">One-off audit</div><div class="muted" style="font-size:14px">Network floor instantly, then a real headless render for actual paint. Verdict in your terminal.</div></div>
+    <div class="panel"><div class="mono green" style="font-size:14px;margin-bottom:6px">npx lightsout scan ./my-project</div><div style="font-weight:600;margin-bottom:4px">Scan your codebase</div><div class="muted" style="font-size:14px">Reads your framework + build directly. Tells a client-rendered SPA from a server-rendered page, and gives framework-aware, risk-graded fixes.</div></div>
+    <div class="panel"><div class="mono green" style="font-size:14px;margin-bottom:6px">npx lightsout-tui</div><div style="font-weight:600;margin-bottom:4px">Explore the leaderboard</div><div class="muted" style="font-size:14px">A terminal UI: the colour-coded PRR leaderboard plus a live analyzer with a floor-vs-FCP gauge.</div></div>
+  </div>
+
+  <div class="panel" style="margin-top:24px;background:linear-gradient(150deg,#0f1318,#0b0e12)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><span style="width:9px;height:9px;border-radius:50%;background:#50dc78;box-shadow:0 0 10px #50dc78"></span><b style="font-size:18px">boxthis</b><span class="mono muted" style="font-size:11px">companion</span></div>
+    <p class="muted" style="font-size:15px;max-width:560px">lightsout measures it; <span style="color:#e7e9ec">boxthis fixes it</span>. A server primitive that streams a JS-free critical shell in the first round-trip — so the page paints on arrival. <span class="mono green">boxthis audit</span> gates a served page's PRR in CI.</p>
+  </div>
+</section>
+
+<section id="study" class="wrap" style="padding:48px 24px 80px">
+  <div class="mono green" style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:12px">Validation</div>
+  <h2 style="margin-bottom:10px">A model, tested against reality</h2>
+  <p class="sub">lightsout ran its exact analysis against 77 popular homepages and rendered each in a throttled headless Chrome. The finding wasn't that the model is perfect — it's that <b style="color:#e7e9ec">the network is rarely the bottleneck. JavaScript is.</b> We published the result, inversions and all. The full dataset + methodology live in the <a class="green" href="https://github.com/TheHarshal30/lightsout/blob/main/bench/RESULTS.md">repo</a>.</p>
+</section>
+
+<footer><div class="wrap mono" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding-top:28px;padding-bottom:48px">
+  <span>lightsout · paint efficiency &gt; document size</span>
+  <span style="display:flex;gap:18px"><a href="https://github.com/TheHarshal30/lightsout">github</a><a href="https://github.com/TheHarshal30/boxthis">boxthis ↗</a><a href="https://endtimes.dev/why-your-website-should-be-under-14kb-in-size/">the article ↗</a></span>
+</div></footer>
+
+</body>
+</html>

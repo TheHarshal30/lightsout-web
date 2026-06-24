@@ -2,23 +2,8 @@
   "name": "lightsout-web",
   "version": "0.1.0",
   "private": true,
-  "description": "The lightsout web app — paint efficiency over document size. Deploys to Vercel: static frontend + serverless functions for live network-floor analysis and the committed 77-site benchmark. The lightsout engine is vendored in lib/ so the repo is standalone.",
-  "type": "module",
-  "scripts": {
-    "dev": "node server.mjs",
-    "start": "node server.mjs"
-  },
-  "dependencies": {
-    "puppeteer-core": "23.11.1"
-  },
-  "engines": {
-    "node": "22.x"
-  },
+  "description": "Landing page for lightsout — the paint-readiness CLI. Static site; everything runs in the CLI.",
   "license": "MIT",
   "author": "Harshal Rudra",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/theharshal30/lightsout-web.git"
-  },
-  "homepage": "https://github.com/theharshal30/lightsout-web#readme"
+  "homepage": "https://github.com/TheHarshal30/lightsout-web#readme"
 }
