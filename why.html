@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your HTML fits in 14 KB. Your website is still slow.</title>
+<meta name="description" content="The 14 KB rule is a lovely piece of networking trivia and a terrible performance metric. I measured 77 sites to prove it.">
+<meta property="og:title" content="Your HTML fits in 14 KB. Your website is still slow.">
+<meta property="og:description" content="I measured 77 sites. Document size and time to paint had a correlation of about zero. JavaScript wins.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0a0c0f;color:#cfd3d9;font-family:'Space Grotesk',system-ui,-apple-system,sans-serif;line-height:1.7;-webkit-font-smoothing:antialiased}
+  ::selection{background:rgba(80,220,120,0.25)}
+  a{color:#50dc78;text-decoration:none}a:hover{text-decoration:underline}
+  .mono{font-family:'IBM Plex Mono','SF Mono',ui-monospace,monospace}
+  .wrap{max-width:680px;margin:0 auto;padding:0 24px}
+  .green{color:#50dc78}.muted{color:#5a616b}
+  .lights{display:flex;gap:7px}
+  .lights span{width:9px;height:9px;border-radius:50%;background:#50dc78;border:1px solid #50dc78;box-shadow:0 0 10px rgba(80,220,120,.6)}
+  nav{border-bottom:1px solid #1a1e24}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;font-size:13px}
+  h1{color:#e7e9ec;font-size:clamp(28px,5vw,40px);line-height:1.12;font-weight:700;letter-spacing:-.02em;margin:48px 0 10px;text-wrap:balance}
+  h2{color:#e7e9ec;font-size:22px;font-weight:600;letter-spacing:-.01em;margin:42px 0 14px}
+  p{margin:0 0 18px;font-size:17px}
+  ul{margin:0 0 18px;padding-left:22px}li{margin:0 0 8px;font-size:17px}
+  code{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:14px;background:#15181d;border:1px solid #23282f;border-radius:5px;padding:1px 6px;color:#cfd3d9}
+  pre{background:#07090b;border:1px solid #1a1e24;border-radius:10px;padding:16px 20px;margin:0 0 18px;overflow-x:auto}
+  pre code{background:none;border:none;padding:0;color:#50dc78}
+  .byline{color:#5a616b;font-family:'IBM Plex Mono',monospace;font-size:13px;margin-bottom:8px}
+  footer{border-top:1px solid #1a1e24;color:#5a616b;font-size:13px;margin-top:56px}
+  footer .wrap{padding:28px 24px 56px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+</style>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"></noscript>
+</head>
+<body>
+<nav><div class="wrap">
+  <a href="./" style="display:flex;align-items:center;gap:9px;color:#e7e9ec"><span class="lights"><span></span><span></span><span></span><span></span><span></span></span><span class="mono" style="font-weight:600">lights<span class="green">out</span></span></a>
+  <a href="./" class="mono">&larr; back</a>
+</div></nav>
+
+<article class="wrap">
+  <div class="byline">the article</div>
+  <h1>Your HTML fits in 14 KB. Your website is still slow.</h1>
+
+  <p>There is a piece of web performance folklore that gets passed around every few months like it is breaking news: your website should be under 14 KB.</p>
+
+  <p>The reasoning is genuinely cool. When a browser opens a fresh TCP connection, the server is not allowed to blast bytes at full speed straight away. It has to start slow and ramp up, a thing called slow start. The first burst it can send before it has to stop and wait for an acknowledgement is roughly 10 packets, which works out to about 14 KB. So if your page fits in that first burst, the browser gets the whole thing in a single network round trip and can begin painting right away. Anything bigger pays for an extra round trip before the first pixel shows up.</p>
+
+  <p>It is a great fact. It is also, as a performance rule, almost completely useless. I know this because I built a tool to check, pointed it at 77 popular websites, and the numbers were not kind to the rule.</p>
+
+  <h2>The setup</h2>
+  <p>The 14 KB number describes the earliest moment the network will physically allow your page to paint. Call it the network floor. It is a real, honest lower bound. The question nobody seems to ask is whether anyone actually paints anywhere near it.</p>
+  <p>So I wrote a small CLI that computes the network floor straight from the bytes (no browser required, just protocol arithmetic) and then renders the same page in a real headless Chrome under a throttled mobile connection to measure when the first pixel actually lands. Divide the floor by the real paint time and you get a single number I called the Paint Readiness Ratio, or PRR.</p>
+  <p>A PRR of 1.00 means the page paints the instant the network allows. A PRR of 0.05 means the browser made the user stare at nothing for twenty times longer than the network required. Guess which one turned out to be more common.</p>
+
+  <h2>The results</h2>
+  <p>Across the 77 sites I could measure:</p>
+  <ul>
+    <li>Mean network floor: about <span class="green">608 ms</span>.</li>
+    <li>Mean actual first paint: about <span style="color:#eb9646">6,521 ms</span>.</li>
+    <li>That is roughly a <span style="color:#eb5a5a">10.7x</span> gap between what the network allowed and what actually happened.</li>
+    <li>Correlation between document size and time to paint: <span style="color:#eb5a5a">approximately zero</span>.</li>
+  </ul>
+  <p>Let me restate that last one, because it is the whole point. The size of your HTML had basically no relationship with how fast the page painted. The 14 KB rule is a rule about a number that does not predict the thing everyone uses it to justify.</p>
+  <p>The fun part is the contradictions:</p>
+  <ul>
+    <li>Spotify ships an HTML document that fits comfortably under 14 KB. It paints in about 13 seconds. It passes the rule and is one of the slowest things on the list.</li>
+    <li>Figma ships a document that sails past the budget by a wide margin. It paints in under a second.</li>
+  </ul>
+  <p>Small and fast were never the same thing. The byte budget passed in both directions and told you nothing useful either time.</p>
+
+  <h2>So what actually decides paint</h2>
+  <p>JavaScript. That is the entire answer.</p>
+  <p>The network was ready in half a second, and the browser then spent the next several seconds downloading, parsing, and executing scripts before it was willing to show a single pixel. The 14 KB rule optimizes the one part of the loading process that was rarely the bottleneck.</p>
+  <p>This is not a hot take that JavaScript is evil. It is just a measurement. If your framework renders the page on the client, your first paint waits on that framework, and no amount of shaving HTML bytes will move it.</p>
+
+  <h2>A brief and humbling interlude</h2>
+  <p>Before I got too smug, I ran the tool on my own website, <a href="https://theharshal30.github.io">theharshal30.github.io</a>.</p>
+  <p>It fits in 14 KB. The HTML document is 5.40 KB gzipped, comfortably inside the first round trip. By the sacred rule, my site is flawless.</p>
+  <p>The tool gave it a PRR of <span style="color:#eb9646">0.31</span> and a label of "Moderately delayed." The network floor was 300 ms. The actual first paint was 968 ms. The culprit was a single render blocking script, <code>support.js</code>, which it correctly identified as a React runtime that hides the page with <code>display:none</code> until it has finished rendering. In other words, my own homepage is held hostage by JavaScript while its tiny, rule abiding HTML sits there doing absolutely nothing.</p>
+  <p>The tool was polite about it. It still pointed out the obvious fix, which is to pre-render the thing to static HTML instead of asking every visitor to boot a rendering engine just to read some text. Have I done that yet? No. I wrote a blog post instead. We all have priorities.</p>
+
+  <h2>The point</h2>
+  <p>The 14 KB rule is a lovely piece of networking trivia and a terrible performance metric. Fitting your HTML in the first congestion window is necessary if you ever want to paint at the floor, but it is nowhere near sufficient, and on the modern web it is rarely the thing standing between your user and the first pixel.</p>
+  <p>If you actually want to know how close your site paints to what the network allows, measure the ratio, not the bytes:</p>
+  <pre><code>npx lightsoutt your-site.com --fcp</code></pre>
+  <p>It gives you the floor, the real paint time, the ratio, and a risk graded list of what to fix, including the difference between "safely add defer here" and "this script renders your page, do not touch it without pre-rendering first."</p>
+  <p>And if you want to reach the floor instead of just measuring how far you are from it, its companion <a href="https://github.com/TheHarshal30/boxthis">boxthis</a> streams a tiny, JavaScript free critical shell first so the page paints on arrival, then streams the rest. Measure with one, fix with the other.</p>
+  <p>Your HTML being under 14 KB is a fine thing. Just stop pretending it makes you fast.</p>
+</article>
+
+<footer><div class="wrap mono">
+  <span>lightsout &middot; paint efficiency &gt; document size</span>
+  <span style="display:flex;gap:18px"><a href="./">home</a><a href="https://github.com/TheHarshal30/lightsout">github</a><a href="https://www.npmjs.com/package/lightsoutt">npm</a></span>
+</div></footer>
+</body>
+</html>
