@@ -63,7 +63,7 @@
   <div class="mono green" style="font-size:12px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:20px">lights out · and away we go</div>
   <h1 style="max-width:780px;margin:0 auto 18px">Does your site paint as fast as the network allows?</h1>
   <p class="sub" style="margin:0 auto 36px">lightsout computes the earliest paint physically possible — the <b style="color:#e7e9ec">network floor</b> — then measures how long JavaScript actually makes you wait.</p>
-  <div class="code mono cmd" style="text-align:left;max-width:560px;margin:0 auto"><span><span class="muted">$</span> npx @fourdoorsmorewhoes/lightsout https://your-site.com <span class="green">--fcp</span></span><button class="copy" data-copy="npx @fourdoorsmorewhoes/lightsout https://your-site.com --fcp">copy</button></div>
+  <div class="code mono cmd" style="text-align:left;max-width:480px;margin:0 auto"><span><span class="muted">$</span> npx lightsoutt https://your-site.com <span class="green">--fcp</span></span><button class="copy" data-copy="npx lightsoutt https://your-site.com --fcp">copy</button></div>
   <div class="mono muted" style="font-size:13px;margin-top:14px">a CLI tool · zero config · works on any URL or local project</div>
 </header>
 
@@ -112,11 +112,11 @@
   <div class="mono green" style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:12px">It's a CLI</div>
   <h2 style="margin-bottom:10px">Everything runs in your terminal</h2>
   <p class="sub" style="margin-bottom:22px">No dashboard to babysit. Audit a URL, scan your repo, or gate your CI on paint readiness.</p>
-  <div class="code mono cmd" style="margin-bottom:22px"><span><span class="muted">$</span> npm i -g <span class="green">@fourdoorsmorewhoes/lightsout</span></span><button class="copy" data-copy="npm i -g @fourdoorsmorewhoes/lightsout">copy</button></div>
+  <div class="code mono cmd" style="margin-bottom:22px"><span><span class="muted">$</span> npm i -g <span class="green">lightsoutt</span></span><button class="copy" data-copy="npm i -g lightsoutt">copy</button></div>
   <div style="display:flex;flex-direction:column;gap:14px">
-    <div class="panel"><div class="cmd mono green" style="font-size:14px;margin-bottom:6px"><span>lightsout &lt;url&gt; --fcp</span><button class="copy" data-copy="lightsout <url> --fcp">copy</button></div><div style="font-weight:600;margin-bottom:4px">One-off audit</div><div class="muted" style="font-size:14px">Network floor instantly, then a real headless render for actual paint. Verdict in your terminal.</div></div>
-    <div class="panel"><div class="cmd mono green" style="font-size:14px;margin-bottom:6px"><span>lightsout scan ./my-project</span><button class="copy" data-copy="lightsout scan ./my-project">copy</button></div><div style="font-weight:600;margin-bottom:4px">Scan your codebase</div><div class="muted" style="font-size:14px">Reads your framework + build directly. Tells a client-rendered SPA from a server-rendered page, and gives framework-aware, risk-graded fixes.</div></div>
-    <div class="panel"><div class="cmd mono green" style="font-size:14px;margin-bottom:6px"><span>lightsout-tui</span><button class="copy" data-copy="lightsout-tui">copy</button></div><div style="font-weight:600;margin-bottom:4px">Explore the leaderboard</div><div class="muted" style="font-size:14px">A terminal UI: the colour-coded PRR leaderboard plus a live analyzer with a floor-vs-FCP gauge.</div></div>
+    <div class="panel"><div class="cmd mono green" style="font-size:14px;margin-bottom:6px"><span>lightsoutt &lt;url&gt; --fcp</span><button class="copy" data-copy="lightsoutt <url> --fcp">copy</button></div><div style="font-weight:600;margin-bottom:4px">One-off audit</div><div class="muted" style="font-size:14px">Network floor instantly, then a real headless render for actual paint. Verdict in your terminal.</div></div>
+    <div class="panel"><div class="cmd mono green" style="font-size:14px;margin-bottom:6px"><span>lightsoutt scan ./my-project</span><button class="copy" data-copy="lightsoutt scan ./my-project">copy</button></div><div style="font-weight:600;margin-bottom:4px">Scan your codebase</div><div class="muted" style="font-size:14px">Reads your framework + build directly. Tells a client-rendered SPA from a server-rendered page, and gives framework-aware, risk-graded fixes.</div></div>
+    <div class="panel"><div class="cmd mono green" style="font-size:14px;margin-bottom:6px"><span>lightsoutt-tui</span><button class="copy" data-copy="lightsoutt-tui">copy</button></div><div style="font-weight:600;margin-bottom:4px">Explore the leaderboard</div><div class="muted" style="font-size:14px">A terminal UI: the colour-coded PRR leaderboard plus a live analyzer with a floor-vs-FCP gauge.</div></div>
   </div>
 
   <div class="panel" style="margin-top:24px;background:linear-gradient(150deg,#0f1318,#0b0e12)">
