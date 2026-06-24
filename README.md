@@ -33,18 +33,20 @@ npm i -g vercel && vercel        # preview;  vercel --prod  to ship
 #   push this repo to GitHub, then Vercel dashboard → New Project → Import.
 ```
 
-## What runs where (and why)
+## What runs where
 
 | | Hosted (Vercel) | CLI (`lightsout`) |
 |---|---|---|
 | Network floor + risk-graded advice (any URL) | ✅ instant | ✅ |
-| Measured PRR for the 77 benchmark sites | ✅ committed value | ✅ |
-| **Live headless render** of an arbitrary URL | ❌ → points to the CLI | ✅ `lightsout <url> --fcp` |
+| Measured PRR for the 77 benchmark sites | ✅ committed value (instant) | ✅ |
+| **Live headless render** of an arbitrary URL | ✅ `@sparticuz/chromium` | ✅ `lightsout <url> --fcp` |
 
-Live First Contentful Paint needs a real browser. That doesn't fit a serverless
-function (Chromium size + the execution-time limit vs. ~15 s renders), so the
-hosted tool computes the floor for anything and serves the *committed* measurement
-for benchmarked hosts; for everything else it hands you the one-line CLI command.
+Live First Contentful Paint runs in the `/api/measure` function via
+**`@sparticuz/chromium` + `puppeteer-core`** (a Lambda-compatible Chromium),
+throttled to 150 ms RTT. Benchmarked hosts skip the browser and return the
+committed value. The function gets **1024 MB / 60 s** (`vercel.json`); a page that
+won't paint within the budget degrades to a "measure it with the CLI" message
+rather than timing out. Locally it drives the system Chrome instead.
 
 ## Standalone
 
