@@ -39,14 +39,21 @@ npm i -g vercel && vercel        # preview;  vercel --prod  to ship
 |---|---|---|
 | Network floor + risk-graded advice (any URL) | ✅ instant | ✅ |
 | Measured PRR for the 77 benchmark sites | ✅ committed value (instant) | ✅ |
-| **Live headless render** of an arbitrary URL | ✅ `@sparticuz/chromium` | ✅ `lightsout <url> --fcp` |
+| **Live headless render** of an arbitrary URL | ✅ *if* a remote browser is configured | ✅ `lightsout <url> --fcp` |
 
-Live First Contentful Paint runs in the `/api/measure` function via
-**`@sparticuz/chromium` + `puppeteer-core`** (a Lambda-compatible Chromium),
-throttled to 150 ms RTT. Benchmarked hosts skip the browser and return the
-committed value. The function gets **1024 MB / 60 s** (`vercel.json`); a page that
-won't paint within the budget degrades to a "measure it with the CLI" message
-rather than timing out. Locally it drives the system Chrome instead.
+Running Chromium *inside* a Vercel function is unreliable (the `@sparticuz`
+binary fails to load its shared libs on the Lambda runtime). So `/api/measure`
+drives a **remote browser over WebSocket** via `puppeteer-core`. Set one env var
+and live render works for any URL:
+
+```
+BROWSER_WS_ENDPOINT = wss://production-sfo.browserless.io/chromium?token=<your-token>
+```
+
+(A free [Browserless](https://www.browserless.io) token works; or point it at any
+remote Chrome.) Without it, the hosted tool still serves the committed PRR for the
+77 benchmark hosts and hands every other URL the one-line CLI command. Locally it
+drives the system Chrome — no env var needed.
 
 ## Standalone
 
