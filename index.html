@@ -35,6 +35,10 @@
   .panel{background:#0e1115;border:1px solid #1a1e24;border-radius:16px;padding:28px}
   .green{color:#50dc78}.amber{color:#eb9646}.red{color:#eb5a5a}.muted{color:#5a616b}
   .code{background:#07090b;border:1px solid #1a1e24;border-radius:10px;padding:16px 20px;font-size:14px;overflow-x:auto;white-space:pre}
+  .cmd{display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .copy{background:none;border:1px solid #23282f;color:#8b919b;border-radius:7px;padding:5px 11px;font-family:'IBM Plex Mono','SF Mono',ui-monospace,monospace;font-size:11px;cursor:pointer;flex-shrink:0;transition:border-color .15s,color .15s}
+  .copy:hover{border-color:#50dc78;color:#50dc78}
+  .copy.done{border-color:#50dc78;color:#50dc78}
   .row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #15181d;font-size:14px}
   .row:last-child{border-bottom:none}
   .bar{width:60px;height:6px;background:#16191e;border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:10px}
@@ -59,7 +63,7 @@
   <div class="mono green" style="font-size:12px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:20px">lights out · and away we go</div>
   <h1 style="max-width:780px;margin:0 auto 18px">Does your site paint as fast as the network allows?</h1>
   <p class="sub" style="margin:0 auto 36px">lightsout computes the earliest paint physically possible — the <b style="color:#e7e9ec">network floor</b> — then measures how long JavaScript actually makes you wait.</p>
-  <div class="code mono" style="display:inline-block;text-align:left"><span class="muted">$</span> npx lightsout https://your-site.com <span class="green">--fcp</span></div>
+  <div class="code mono cmd" style="text-align:left;max-width:480px;margin:0 auto"><span><span class="muted">$</span> npx lightsout https://your-site.com <span class="green">--fcp</span></span><button class="copy" data-copy="npx lightsout https://your-site.com --fcp">copy</button></div>
   <div class="mono muted" style="font-size:13px;margin-top:14px">a CLI tool · zero config · works on any URL or local project</div>
 </header>
 
@@ -109,9 +113,9 @@
   <h2 style="margin-bottom:10px">Everything runs in your terminal</h2>
   <p class="sub" style="margin-bottom:28px">No dashboard to babysit. Audit a URL, scan your repo, or gate your CI on paint readiness.</p>
   <div style="display:flex;flex-direction:column;gap:14px">
-    <div class="panel"><div class="mono green" style="font-size:14px;margin-bottom:6px">npx lightsout &lt;url&gt; --fcp</div><div style="font-weight:600;margin-bottom:4px">One-off audit</div><div class="muted" style="font-size:14px">Network floor instantly, then a real headless render for actual paint. Verdict in your terminal.</div></div>
-    <div class="panel"><div class="mono green" style="font-size:14px;margin-bottom:6px">npx lightsout scan ./my-project</div><div style="font-weight:600;margin-bottom:4px">Scan your codebase</div><div class="muted" style="font-size:14px">Reads your framework + build directly. Tells a client-rendered SPA from a server-rendered page, and gives framework-aware, risk-graded fixes.</div></div>
-    <div class="panel"><div class="mono green" style="font-size:14px;margin-bottom:6px">npx lightsout-tui</div><div style="font-weight:600;margin-bottom:4px">Explore the leaderboard</div><div class="muted" style="font-size:14px">A terminal UI: the colour-coded PRR leaderboard plus a live analyzer with a floor-vs-FCP gauge.</div></div>
+    <div class="panel"><div class="cmd mono green" style="font-size:14px;margin-bottom:6px"><span>npx lightsout &lt;url&gt; --fcp</span><button class="copy" data-copy="npx lightsout <url> --fcp">copy</button></div><div style="font-weight:600;margin-bottom:4px">One-off audit</div><div class="muted" style="font-size:14px">Network floor instantly, then a real headless render for actual paint. Verdict in your terminal.</div></div>
+    <div class="panel"><div class="cmd mono green" style="font-size:14px;margin-bottom:6px"><span>npx lightsout scan ./my-project</span><button class="copy" data-copy="npx lightsout scan ./my-project">copy</button></div><div style="font-weight:600;margin-bottom:4px">Scan your codebase</div><div class="muted" style="font-size:14px">Reads your framework + build directly. Tells a client-rendered SPA from a server-rendered page, and gives framework-aware, risk-graded fixes.</div></div>
+    <div class="panel"><div class="cmd mono green" style="font-size:14px;margin-bottom:6px"><span>npx lightsout-tui</span><button class="copy" data-copy="npx lightsout-tui">copy</button></div><div style="font-weight:600;margin-bottom:4px">Explore the leaderboard</div><div class="muted" style="font-size:14px">A terminal UI: the colour-coded PRR leaderboard plus a live analyzer with a floor-vs-FCP gauge.</div></div>
   </div>
 
   <div class="panel" style="margin-top:24px;background:linear-gradient(150deg,#0f1318,#0b0e12)">
@@ -131,5 +135,28 @@
   <span style="display:flex;gap:18px"><a href="https://github.com/TheHarshal30/lightsout">github</a><a href="https://github.com/TheHarshal30/boxthis">boxthis ↗</a><a href="https://endtimes.dev/why-your-website-should-be-under-14kb-in-size/">the article ↗</a></span>
 </div></footer>
 
+<script>
+  // Copy-to-clipboard for command blocks. Inline + at end of body so it never
+  // blocks first paint. Delegated so one listener covers every .copy button.
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest(".copy");
+    if (!b) return;
+    var done = function () {
+      var prev = b.textContent;
+      b.textContent = "copied ✓";
+      b.classList.add("done");
+      setTimeout(function () { b.textContent = prev; b.classList.remove("done"); }, 1400);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(b.dataset.copy).then(done, function () {});
+    } else {
+      var ta = document.createElement("textarea");
+      ta.value = b.dataset.copy; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); done(); } catch (_) {}
+      document.body.removeChild(ta);
+    }
+  });
+</script>
 </body>
 </html>
